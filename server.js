@@ -4,6 +4,7 @@ var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
 var system = require('child_process');
+var navy_game = require('./naval.js');
 
 var file = {
 	save: function(name,text){
@@ -27,6 +28,7 @@ class client{
 		this.tiles = [];
 		client.all.push(this);
 		socket.on('disconnect',e=>{
+			navy_game.remPlayer(this);
 			let index = client.all.indexOf(this);
 			if(index != -1){
 				client.all.splice(index,1);
@@ -50,4 +52,7 @@ http.listen(port,()=>{console.log('Serving Port: '+port)});
 
 io.on('connection',socket=>{
 	var c = new client(socket);
+	socket.on('nav-begin',data=>{
+		navy_game.addPlayer(c,data);
+	})
 });
