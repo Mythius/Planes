@@ -12,6 +12,7 @@
 			height: 100%;
 			position: fixed;
 			z-index: -1;
+			image-rendering: crisp-edges;
 		}
 		body{
 			margin:0;
@@ -51,16 +52,22 @@
 			background-color: lightgray;
 		}
 	</style>
+	<script src=helpers.js></script>
+	<script src=audio.js></script>
+	<script src=sprite.js></script>
+	<script src=input.js></script>
+	<script src=/socket.io/socket.io.js></script>
 </head>
 <body>
 	<canvas width=800 height=600></canvas>
 	<menu>
 		<h1>2D Naval War</h1>
 		<input placeholder="Your Name">
-		<button>Play</button>
+		<button id=play>Play</button>
 		<button>Host</button>
 		<button>Settings</button>
 	</menu>
+	<script src=main.js></script>
 </body>
 </html>
 <link rel="icon" type="image/x-icon" href="icon.png">

@@ -321,10 +321,10 @@ class Sprite extends Hitbox{
 			}
 			this.#iter++;
 		} else {
-			this.move(this.pos.clone());
+			this.move.call(this,this.pos.clone());
 		}
 		if(this.attack && typeof this.attack == 'function'){
-			this.attack();
+			this.attack.call(this);
 		}
 		let pos = this.pos;
 		let drawPos = this.lines[2].getPosA();
