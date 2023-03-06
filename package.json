@@ -1,0 +1,24 @@
+{
+  "name": "planes",
+  "version": "1.0.0",
+  "description": "A Naval War Io Game",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mythius/Planes.git"
+  },
+  "author": "Matthias and Zack Southwick",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Mythius/Planes/issues"
+  },
+  "homepage": "https://github.com/Mythius/Planes#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1"
+  }
+}
