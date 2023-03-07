@@ -328,12 +328,14 @@ class Sprite extends Hitbox{
 		}
 		let pos = this.pos;
 		let drawPos = this.lines[2].getPosA();
-		ctx.save();
-		ctx.translate(pos.x,pos.y);
-		ctx.rotate(Vector.rad(this.dir));
-		ctx.scale(this.transformX,1);
-		ctx.drawImage(this.element,-this.w/2,-this.h/2);
-		ctx.restore();
+		if(this.visible){
+			ctx.save();
+			ctx.translate(pos.x,pos.y);
+			ctx.rotate(Vector.rad(this.dir));
+			ctx.scale(this.transformX,1);
+			ctx.drawImage(this.element,-this.w/2,-this.h/2);
+			ctx.restore();
+		}
 		if(Hitbox.show) this.DRAW();
 	}
 	addAnimation(animation_path){
