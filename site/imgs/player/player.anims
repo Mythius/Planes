@@ -1,0 +1,1 @@
+{"dirname":"imgs/player","frames":[{"frames":[1],"name":"idle","fps":"10"},{"frames":[0],"name":"equip","fps":"10"},{"frames":[2],"name":"aim","fps":"10"},{"frames":[3],"name":"drop","fps":"10"}],"count":4}
