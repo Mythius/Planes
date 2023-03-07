@@ -1,7 +1,7 @@
 var socket = io();
 var name = '',started=false;
 var canvas = obj('canvas'),ctx=canvas.getContext('2d');
-var drawable = [];
+var drawable = [],bullets = [];
 var drawObjs = {};
 var plane,ID=-1;
 var bg = new Image;bg.src='imgs/bg.png';
@@ -76,6 +76,10 @@ function setup(){
 				drawable.push(d);
 			}
 		}
+		bullets = [];
+		for(let wp of data.wdata){
+			bullets.push(wp)
+		}
 		loop();
 	});
 }
@@ -130,6 +134,12 @@ function loop(){
 	ctx.beginPath();
 	ctx.rect(-500,-500,1000,1000);
 	ctx.fill();
+	ctx.beginPath();
+	ctx.strokeStyle = 'black';
+	for(let bullet of bullets){
+		ctx.rect(bullet.x,bullet.y,1,1);
+	}
+	ctx.stroke();
 	for(let thing of drawable){
 		thing.draw();
 	}

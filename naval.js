@@ -97,7 +97,7 @@ class Player extends PH.Hitbox{
 				}
 			}
 			if(d.shoot){
-				new Bullet(this.pos.clone(),this.dir,200);
+				new Bullet(this.pos.x,this.pos.y,this.dir-90,400,16).offsetStart(7,5)
 			}
 		} else {
 			this.vehicle.dir += d.ddir;
@@ -105,6 +105,10 @@ class Player extends PH.Hitbox{
 			if(d.mount){
 				this.vehicle.player = null;
 				this.vehicle = null;
+			}
+			if(d.shoot && this.vehicle instanceof Plane){
+				new Bullet(this.vehicle.pos.x,this.vehicle.pos.y,this.vehicle.dir,800,35).offsetStart(22,25);
+				new Bullet(this.vehicle.pos.x,this.vehicle.pos.y,this.vehicle.dir,800,35).offsetStart(-22,25);
 			}
 		}
 	}
@@ -136,7 +140,7 @@ class Plane extends PH.Hitbox{
 		this.flying = false;
 		this.scale = new PH.Vector(.8,.4);
 		this.player = null;
-		this.speed = 9;
+		this.speed = 16;
 		this.cdown = 30;
 	}
 	move(){
@@ -170,8 +174,29 @@ class Plane extends PH.Hitbox{
 }
 
 class Bullet{
-	constructor(vector,dir,range){
-		
+	constructor(x,y,dir,range,s){
+		this.position = new PH.Vector(x,y);
+		this.direction = dir;
+		this.count_down = range;
+		this.speed = s;
+		weapons.push(this);
+	}
+	offsetStart(right=0,up=0){
+		this.position = PH.Vector.getPointIn(PH.Vector.rad(this.direction),up,this.position.x,this.position.y);
+		this.position = PH.Vector.getPointIn(PH.Vector.rad(this.direction+90),right,this.position.x,this.position.y);
+	}
+	move(){
+		this.position = PH.Vector.getPointIn(PH.Vector.rad(this.direction-0),this.speed,this.position.x,this.position.y);
+		this.count_down -= this.speed;
+		if(this.count_down < 0){
+			let ix = weapons.indexOf(this);
+			if(ix!=-1){
+				weapons.splice(ix,1);
+			}
+		}
+	}
+	toObjt(){
+		return {x:this.position.x,y:this.position.y};
 	}
 }
 
