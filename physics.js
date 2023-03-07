@@ -137,8 +137,6 @@ class Hitbox{
 				}
 			}
 			this.#iter++;
-		} else {
-			this.move.call(this,this.pos.clone());
 		}
 	}
 	DRAW(){
@@ -153,8 +151,6 @@ class Hitbox{
 				}
 			}
 			this.#iter++;
-		} else {
-			this.move.call(this,this.pos.clone());
 		}
 	}
 	touches(hitbox){

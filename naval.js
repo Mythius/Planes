@@ -22,7 +22,7 @@ function remPlayer(client){
 game_loop();
 
 function game_loop(){
-	if(playing) setTimeout(game_loop,1000/60);
+	if(playing) setTimeout(game_loop,1000/45);
 	for(sprite of sprites){
 		sprite.move();
 		if(sprite.stats.dead>0){
@@ -59,6 +59,8 @@ function tv(o){return new PH.Vector(o.x,o.y)}
 class Player extends PH.Hitbox{
 	constructor(client,vector){
 		super(vector,32,32);
+		this.scale = new PH.Vector(.5,.5);
+		this.h=40;
 		this.client = client;
 		this.client.player = this;
 		this.id=gid++;
@@ -79,11 +81,31 @@ class Player extends PH.Hitbox{
 	}
 	controls(d){
 		if(!this.vehicle){
-			this.direction = PH.Vector.getDir(d.m.x,d.m.y);
+			this.direction = PH.Vector.getDir(d.m.x,d.m.y)+90;
 			let p = this.pos;
-			this.position = new PH.Vector(d.p.dx+p.x,d.p.dy+p.y);
+			let s = 3;
+			this.position = new PH.Vector(d.p.dx*s+p.x,d.p.dy*s+p.y);
+			if(d.vreq == 'Plane'){
+				new Plane(this,this.pos.clone());
+			}
+			if(d.mount){
+				let vhs = sprites.filter(e=>!e.client).filter(e=>e.touches(this));
+				if(vhs.length != 0){
+					this.vehicle = vhs[0];
+					this.vehicle.start();
+					this.vehicle.player = this;
+				}
+			}
+			if(d.shoot){
+				new Bullet(this.pos.clone(),this.dir,200);
+			}
 		} else {
-
+			this.vehicle.dir += d.ddir;
+			this.position = this.vehicle.pos;
+			if(d.mount){
+				this.vehicle.player = null;
+				this.vehicle = null;
+			}
 		}
 	}
 	move(){}
@@ -97,7 +119,7 @@ class Player extends PH.Hitbox{
 }
 
 class Plane extends PH.Hitbox{
-	constructor(vector){
+	constructor(p,vector){
 		super(vector,135,179);
 		sprites.push(this);
 		this.stats = {
@@ -110,9 +132,12 @@ class Plane extends PH.Hitbox{
 			dead:false
 		}
 		this.id = gid++;
+		console.log('Created Plane ID:'+this.id);
 		this.flying = false;
+		this.scale = new PH.Vector(.8,.4);
 		this.player = null;
-		this.speed = 5;
+		this.speed = 9;
+		this.cdown = 30;
 	}
 	move(){
 		if(this.flying){
@@ -121,7 +146,14 @@ class Plane extends PH.Hitbox{
 			// if(keys.down('arrowleft')) dir += 360-spin;
 			// if(keys.down('arrowright')) dir += spin;
 			this.direction = dir;
-			this.position = Vector.getPointIn(Vector.rad(dir),this.speed,this.pos.x,this.pos.y)
+			this.position = PH.Vector.getPointIn(PH.Vector.rad(dir),this.speed,this.pos.x,this.pos.y);
+			if(!this.player){
+				if(this.cdown-- == 1){
+					this.stats.dead = true;
+				} else if(this.cdown == 0){
+					removeSprite(this);
+				}
+			}
 		}
 	}
 	toObjt(){
@@ -129,8 +161,17 @@ class Plane extends PH.Hitbox{
 		let id = this.id;
 		let stats = this.stats;
 		let flying = this.flying;
-		let pid = this.player.id;
+		let pid = this.player?.id;
 		return {hb,id,stats,flying,pid};
+	}
+	start(){
+		this.flying = true;
+	}
+}
+
+class Bullet{
+	constructor(vector,dir,range){
+		
 	}
 }
 
