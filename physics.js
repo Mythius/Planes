@@ -164,6 +164,12 @@ class Hitbox{
 					}
 				}
 			}
+		} else if(hitbox instanceof Line){
+			for(let l of this.lines){
+				if(hitbox.touches(l)){
+					return true;
+				}
+			}
 		}
 		return false;
 	}
