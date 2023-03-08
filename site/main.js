@@ -12,7 +12,7 @@ bg.onload = function(){
 
 obj('#play').on('click',play);
 obj('input').focus();
-Hitbox.show = false;
+Hitbox.show = true;
 
 
 
@@ -61,12 +61,13 @@ function setup(){
 			if(d){
 				d.upd(sp);
 				if(d.stats.dead){
-					removeDrawable(drawObjs[sp.id]);
 					if(!(drawable[1] instanceof Player)) explode(drawObjs[sp.id].pos);
+					removeDrawable(drawObjs[sp.id]);
 					drawObjs[sp.id] = null;
 					return;
 				}
 			} else {
+				if(sp.stats.dead) continue;
 				if(sp.stats.type=='Player'){
 					d = new Player(sp);
 				} else if(sp.stats.type=='Plane'){
