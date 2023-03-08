@@ -12,7 +12,7 @@ bg.onload = function(){
 
 obj('#play').on('click',play);
 obj('input').focus();
-Hitbox.show = true;
+Hitbox.show = false;
 
 
 
@@ -96,11 +96,11 @@ function controls(){
 	}
 	if(keys.down('a')){
 		command_data.p.dx -= 1;
-		command_data.ddir -= 3;
+		command_data.ddir -= 1;
 	}
 	if(keys.down('d')){
 		command_data.p.dx += 1;
-		command_data.ddir += 3;
+		command_data.ddir += 1;
 	}
 	if(keys.down('s')){
 		command_data.p.dy += 1;
@@ -188,13 +188,13 @@ class Plane extends Sprite{
 		this.setOffset = tv(d.hb.offset);
 		this.setScale = tv(d.hb.scale);
 		this.direction = d.hb.dir;
-		this.flying = d.flying;
+		this.on = d.on;
 		if(this.pid) {
 			this.player = drawObjs[d.pid];
 			this.player.vehicle = this;
 			this.player.position = tv(d.hb.pos);
 		}
-		if(this.flying){
+		if(this.on){
 			this.animation?.play('fly',true);
 		} else {
 			this.animation?.stop();

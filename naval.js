@@ -95,7 +95,9 @@ class Player extends PH.Hitbox{
 		if(!this.vehicle){
 			this.direction = PH.Vector.getDir(d.m.x,d.m.y)+90;
 			let p = this.pos;
-			let s = 3;
+			let s = 3; // player speed
+			d.p.dx = Math.max(Math.min(d.p.dx,1),-1);
+			d.p.dy = Math.max(Math.min(d.p.dy,1),-1);
 			this.position = new PH.Vector(d.p.dx*s+p.x,d.p.dy*s+p.y);
 			if(d.vreq == 'Plane'){
 				new Plane(this,this.pos.clone());
@@ -113,16 +115,13 @@ class Player extends PH.Hitbox{
 				new Bullet(this.team,this.pos.x,this.pos.y,this.dir-90,400,16).offsetStart(7,5)
 			}
 		} else {
-			this.vehicle.dir += d.ddir;
+			this.vehicle.turn(d.ddir);
 			this.position = this.vehicle.pos;
+			this.vehicle.shoot(this,d);
 			if(d.mount){
 				this.vehicle.team = -1;
 				this.vehicle.player = null;
 				this.vehicle = null;
-			}
-			if(d.shoot && this.vehicle instanceof Plane){
-				new Bullet(this.team,this.vehicle.pos.x,this.vehicle.pos.y,this.vehicle.dir,800,35).offsetStart(22,25);
-				new Bullet(this.team,this.vehicle.pos.x,this.vehicle.pos.y,this.vehicle.dir,800,35).offsetStart(-22,25);
 			}
 		}
 	}
@@ -136,10 +135,42 @@ class Player extends PH.Hitbox{
 	}
 }
 
-class Plane extends PH.Hitbox{
+class Vehicle extends PH.Hitbox{
 	constructor(p,vector){
 		super(vector,135,179);
 		sprites.push(this);
+		this.id = gid++;
+		this.on = false;
+		this.stats = {};
+		this.player = null;
+		this.spin = 0; // must overwrite turn speed
+		this.team = 0; // 0 Means not on team, -1 mean invincible, otherwise team ids must match
+	}
+	moveVehicle(){
+		if(this.on){
+			let dir = this.dir;
+			this.position = PH.Vector.getPointIn(PH.Vector.rad(dir),this.speed,this.pos.x,this.pos.y);
+		}
+	}
+	turn(ddir){
+		this.dir += this.spin * Math.max(Math.min(ddir,1),-1);
+	}
+	toObjt(){
+		let hb = this.toObj();
+		let id = this.id;
+		let stats = this.stats;
+		let on = this.on;
+		let pid = this.player?.id;
+		return {hb,id,stats,on,pid};
+	}
+	start(){
+		this.on = true;
+	}
+}
+
+class Plane extends Vehicle{
+	constructor(p,vector){
+		super(p,vector);
 		this.stats = {
 			type:'Plane',
 			max_health: 200,
@@ -149,23 +180,14 @@ class Plane extends PH.Hitbox{
 			bombs:1,
 			dead:false
 		}
-		this.id = gid++;
-		console.log('Created Plane ID:'+this.id);
-		this.flying = false;
 		this.setScale = new PH.Vector(.8,.4);
-		this.player = null;
 		this.speed = 16;
 		this.cdown = 30;
-		this.team = 0;
+		this.spin = 3;
 	}
 	move(){
-		if(this.flying){
-			const spin = 3;
-			let dir = this.dir;
-			// if(keys.down('arrowleft')) dir += 360-spin;
-			// if(keys.down('arrowright')) dir += spin;
-			this.direction = dir;
-			this.position = PH.Vector.getPointIn(PH.Vector.rad(dir),this.speed,this.pos.x,this.pos.y);
+		this.moveVehicle();
+		if(this.on){
 			if(!this.player){
 				if(this.cdown-- == 1){
 					this.stats.dead = true;
@@ -175,16 +197,11 @@ class Plane extends PH.Hitbox{
 			}
 		}
 	}
-	toObjt(){
-		let hb = this.toObj();
-		let id = this.id;
-		let stats = this.stats;
-		let flying = this.flying;
-		let pid = this.player?.id;
-		return {hb,id,stats,flying,pid};
-	}
-	start(){
-		this.flying = true;
+	shoot(player,d){
+		if(d.shoot){
+			new Bullet(player.team,this.pos.x,this.pos.y,this.dir,800,35).offsetStart(22,25);
+			new Bullet(player.team,this.pos.x,this.pos.y,this.dir,800,35).offsetStart(-22,25);
+		}
 	}
 }
 
