@@ -61,13 +61,8 @@ function setup(){
 			if(d){
 				d.upd(sp);
 				if(d.stats.dead){
-<<<<<<< HEAD
 					removeDrawable(drawObjs[sp.id]);
 					if(!(drawObjs[sp.id] instanceof Player)) explode(drawObjs[sp.id].pos);
-=======
-					if(!(drawable[1] instanceof Player)) explode(drawObjs[sp.id].pos);
-					removeDrawable(drawObjs[sp.id]);
->>>>>>> refs/remotes/origin/main
 					drawObjs[sp.id] = null;
 					return;
 				}
