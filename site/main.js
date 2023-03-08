@@ -108,8 +108,8 @@ function controls(){
 	if(keys.down('w')){
 		command_data.p.dy -= 1;
 	}
-	if(keys.down('b')){
-		keys.keys['b'] = false;
+	if(keys.down('p')){
+		keys.keys['p'] = false;
 		command_data.vreq = 'Plane';
 	}
 	if(keys.down('e')){
@@ -150,19 +150,23 @@ function loop(){
 
 function tv(o){return new Vector(o.x,o.y)}
 
+function loadData(object,d){
+	object.stats = d.stats;
+	object.w = d.hb.w;
+	object.h = d.hb.h;
+	object.direction = d.hb.dir;
+	object.position = tv(d.hb.pos);
+	object.setOffset = tv(d.hb.offset);
+	object.setScale = tv(d.hb.scale);
+}
+
 class Player extends Sprite{
 	constructor(data){
 		super('imgs/player/sprite_1.png');
 		this.upd(data);
 	}
 	upd(d){
-		this.stats = d.stats;
-		this.w = d.hb.w;
-		this.h = d.hb.h;
-		this.direction = d.hb.dir;
-		this.position = tv(d.hb.pos);
-		this.setOffset = tv(d.hb.offset);
-		this.setScale = tv(d.hb.scale);
+		loadData(this,d);
 		this.v = d.v;
 		if(d.v){
 			this.visible = false;
@@ -181,13 +185,7 @@ class Plane extends Sprite{
 		this.upd(data);
 	}
 	upd(d){
-		this.stats = d.stats;
-		this.w = d.hb.w;
-		this.h = d.hb.h;
-		this.position = tv(d.hb.pos);
-		this.setOffset = tv(d.hb.offset);
-		this.setScale = tv(d.hb.scale);
-		this.direction = d.hb.dir;
+		loadData(this,d);
 		this.on = d.on;
 		if(this.pid) {
 			this.player = drawObjs[d.pid];
