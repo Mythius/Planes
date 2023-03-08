@@ -4,7 +4,7 @@ var canvas = obj('canvas'),ctx=canvas.getContext('2d');
 var drawable = [],bullets = [];
 var drawObjs = {};
 var plane,ID=-1;
-var bg = new Image;bg.src='imgs/bg.png';
+var bg = new Image;bg.src='https://i.pinimg.com/originals/fd/02/54/fd0254ea4f545b0e7ba9d4f64f1688a6.jpg';
 var pbg;
 bg.onload = function(){
 	pbg=ctx.createPattern(bg,'repeat');
@@ -62,7 +62,7 @@ function setup(){
 				d.upd(sp);
 				if(d.stats.dead){
 					removeDrawable(drawObjs[sp.id]);
-					if(!(drawable[1] instanceof Player)) explode(drawObjs[sp.id].pos);
+					if(!(drawObjs[sp.id] instanceof Player)) explode(drawObjs[sp.id].pos);
 					drawObjs[sp.id] = null;
 					return;
 				}
@@ -132,7 +132,7 @@ function loop(){
 		ctx.translate(canvas.width/2-me.pos.x,canvas.height/2-me.pos.y);
 	}
 	ctx.beginPath();
-	ctx.rect(-500,-500,1000,1000);
+	ctx.rect(-500,-500,6000,6000);
 	ctx.fill();
 	ctx.beginPath();
 	ctx.strokeStyle = 'black';
