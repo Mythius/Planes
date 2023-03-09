@@ -20,7 +20,7 @@ function remPlayer(client){
 	}
 }
 
-new Island()
+// new Island()
 
 game_loop();
 

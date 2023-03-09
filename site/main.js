@@ -4,7 +4,7 @@ var canvas = obj('canvas'),ctx=canvas.getContext('2d');
 var drawable = [],bullets = [];
 var drawObjs = {};
 var plane,ID=-1;
-var bg = new Image;bg.src='https://i.pinimg.com/originals/fd/02/54/fd0254ea4f545b0e7ba9d4f64f1688a6.jpg';
+var bg = new Image;bg.src='imgs/island1.png';
 var pbg;
 var gox=0,goy=0;
 bg.onload = function(){
@@ -63,7 +63,7 @@ function setup(){
 				d.upd(sp);
 				if(d.stats.dead){
 					removeDrawable(drawObjs[sp.id]);
-					if(drawObjs[sp.id instanceof Battleship]) drawObjs[sp.id].destroy();
+					if(drawObjs[sp.id] instanceof Battleship) drawObjs[sp.id].destroy();
 					if(!(drawObjs[sp.id] instanceof Player)) explode(drawObjs[sp.id].pos);
 					drawObjs[sp.id] = null;
 					return;
@@ -199,7 +199,7 @@ class Player extends Sprite{
 
 class Island extends Sprite{
 	constructor(data){
-		
+
 	}
 }
 
