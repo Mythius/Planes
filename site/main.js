@@ -6,6 +6,7 @@ var drawObjs = {};
 var plane,ID=-1;
 var bg = new Image;bg.src='https://i.pinimg.com/originals/fd/02/54/fd0254ea4f545b0e7ba9d4f64f1688a6.jpg';
 var pbg;
+var gox=0,goy=0;
 bg.onload = function(){
 	pbg=ctx.createPattern(bg,'repeat');
 }
@@ -13,7 +14,7 @@ bg.onload = function(){
 obj('#play').on('click',play);
 obj('input').focus();
 Hitbox.show = false;
-
+Sprite.prototype.stats = {};
 
 
 window.onresize = resize;
@@ -62,6 +63,7 @@ function setup(){
 				d.upd(sp);
 				if(d.stats.dead){
 					removeDrawable(drawObjs[sp.id]);
+					if(drawObjs[sp.id instanceof Battleship]) drawObjs[sp.id].destroy();
 					if(!(drawObjs[sp.id] instanceof Player)) explode(drawObjs[sp.id].pos);
 					drawObjs[sp.id] = null;
 					return;
@@ -72,9 +74,11 @@ function setup(){
 					d = new Player(sp);
 				} else if(sp.stats.type=='Plane'){
 					d = new Plane(sp); 
+				} else if(sp.stats.type=='Battleship'){
+					d = new Battleship(sp);
 				}
 				drawObjs[sp.id] = d;
-				drawable.push(d);
+				drawable.unshift(d);
 			}
 		}
 		bullets = [];
@@ -86,13 +90,17 @@ function setup(){
 }
 
 function controls(){
+	let cx = canvas.width/2;
+	let cy = canvas.height/2
 	let command_data = {
 		p:{dx:0,dy:0},
 		m:{x:0,y:0},
 		shoot:false,
 		vreq:'', // vehicle request
 		mount:false,
-		ddir:0
+		ddir:0,
+		cx,
+		cy
 	}
 	if(keys.down('a')){
 		command_data.p.dx -= 1;
@@ -112,10 +120,15 @@ function controls(){
 		keys.keys['p'] = false;
 		command_data.vreq = 'Plane';
 	}
+	if(keys.down('b')){
+		keys.keys['b'] = false;
+		command_data.vreq = 'Battleship';
+	}
 	if(keys.down('e')){
 		keys.keys['e'] = false;
 		command_data.mount = true;
 	}
+
 	command_data.shoot = mouse.down;
 	command_data.m.x = canvas.width/2 - mouse.pos.x;
 	command_data.m.y = canvas.height/2 - mouse.pos.y;
@@ -130,6 +143,8 @@ function loop(){
 	let me = drawObjs[ID];
 	if(me){
 		ctx.save();
+		gox = canvas.width/2//-me.pos.x;
+		goy = canvas.height/2//-me.pos.y;
 		ctx.translate(canvas.width/2-me.pos.x,canvas.height/2-me.pos.y);
 	}
 	ctx.beginPath();
@@ -141,11 +156,17 @@ function loop(){
 		ctx.rect(bullet.x,bullet.y,1,1);
 	}
 	ctx.stroke();
-	for(let thing of drawable){
+	let ordered = layer(drawable);
+	for(let thing of ordered){
 		thing.draw();
 	}
 	if(me) ctx.restore();
 	controls();
+}
+
+function layer(things){
+	let layers = {Plane:10,Battleship:1,Turret:2,Player:0};
+	return things.sort((a,b)=>layers[a.stats.type]-layers[b.stats.type]);
 }
 
 function tv(o){return new Vector(o.x,o.y)}
@@ -176,6 +197,12 @@ class Player extends Sprite{
 	}
 }
 
+class Island extends Sprite{
+	constructor(data){
+		
+	}
+}
+
 class Plane extends Sprite{
 	constructor(data){
 		super('imgs/planeani/0.png');
@@ -197,5 +224,39 @@ class Plane extends Sprite{
 		} else {
 			this.animation?.stop();
 		}
+	}
+}
+
+class Battleship extends Sprite{
+	constructor(data){
+		super('imgs/boat/0.png');
+		this.turret1 = new Sprite('imgs/Guns/0.png');
+		this.turret1.stats.type = 'Turret';
+		this.turret2 = new Sprite('imgs/Guns/2.png');
+		this.turret2.stats.type = 'Turret';
+		drawable.push(this.turret1)
+		drawable.push(this.turret2)
+		this.upd(data);
+	}
+	upd(d){
+		loadData(this,d);
+		this.on = d.on;
+		if(this.pid) {
+			this.player = drawObjs[d.pid];
+			this.player.vehicle = this;
+			this.player.position = tv(d.hb.pos);
+		}
+		var tur1pos = Vector.getPointIn(Vector.rad(this.dir),95,this.pos.x,this.pos.y);
+		this.turret1.position = tur1pos;
+		let dir1 = d.stats.td1;
+		this.turret1.direction = dir1;
+		var tur2pos = Vector.getPointIn(Vector.rad(this.dir),-170,this.pos.x,this.pos.y);
+		this.turret2.position = tur2pos;
+		let dir2 = d.stats.td2;
+		this.turret2.direction = dir2;
+	}
+	destroy(){
+		removeDrawable(this.turret1);
+		removeDrawable(this.turret2);
 	}
 }
