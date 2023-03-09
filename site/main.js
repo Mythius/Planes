@@ -1,10 +1,10 @@
 var socket = io();
 var name = '',started=false;
 var canvas = obj('canvas'),ctx=canvas.getContext('2d');
-var drawable = [];
+var drawable = [],bullets = [];
 var drawObjs = {};
 var plane,ID=-1;
-var bg = new Image;bg.src='imgs/bg.png';
+var bg = new Image;bg.src='https://i.pinimg.com/originals/fd/02/54/fd0254ea4f545b0e7ba9d4f64f1688a6.jpg';
 var pbg;
 bg.onload = function(){
 	pbg=ctx.createPattern(bg,'repeat');
@@ -62,11 +62,12 @@ function setup(){
 				d.upd(sp);
 				if(d.stats.dead){
 					removeDrawable(drawObjs[sp.id]);
-					if(!(drawable[1] instanceof Player)) explode(drawObjs[sp.id].pos);
+					if(!(drawObjs[sp.id] instanceof Player)) explode(drawObjs[sp.id].pos);
 					drawObjs[sp.id] = null;
 					return;
 				}
 			} else {
+				if(sp.stats.dead) continue;
 				if(sp.stats.type=='Player'){
 					d = new Player(sp);
 				} else if(sp.stats.type=='Plane'){
@@ -75,6 +76,10 @@ function setup(){
 				drawObjs[sp.id] = d;
 				drawable.push(d);
 			}
+		}
+		bullets = [];
+		for(let wp of data.wdata){
+			bullets.push(wp)
 		}
 		loop();
 	});
@@ -91,11 +96,11 @@ function controls(){
 	}
 	if(keys.down('a')){
 		command_data.p.dx -= 1;
-		command_data.ddir -= 3;
+		command_data.ddir -= 1;
 	}
 	if(keys.down('d')){
 		command_data.p.dx += 1;
-		command_data.ddir += 3;
+		command_data.ddir += 1;
 	}
 	if(keys.down('s')){
 		command_data.p.dy += 1;
@@ -103,8 +108,8 @@ function controls(){
 	if(keys.down('w')){
 		command_data.p.dy -= 1;
 	}
-	if(keys.down('b')){
-		keys.keys['b'] = false;
+	if(keys.down('p')){
+		keys.keys['p'] = false;
 		command_data.vreq = 'Plane';
 	}
 	if(keys.down('e')){
@@ -128,8 +133,14 @@ function loop(){
 		ctx.translate(canvas.width/2-me.pos.x,canvas.height/2-me.pos.y);
 	}
 	ctx.beginPath();
-	ctx.rect(-500,-500,1000,1000);
+	ctx.rect(-500,-500,6000,6000);
 	ctx.fill();
+	ctx.beginPath();
+	ctx.strokeStyle = 'black';
+	for(let bullet of bullets){
+		ctx.rect(bullet.x,bullet.y,1,1);
+	}
+	ctx.stroke();
 	for(let thing of drawable){
 		thing.draw();
 	}
@@ -139,19 +150,23 @@ function loop(){
 
 function tv(o){return new Vector(o.x,o.y)}
 
+function loadData(object,d){
+	object.stats = d.stats;
+	object.w = d.hb.w;
+	object.h = d.hb.h;
+	object.direction = d.hb.dir;
+	object.position = tv(d.hb.pos);
+	object.setOffset = tv(d.hb.offset);
+	object.setScale = tv(d.hb.scale);
+}
+
 class Player extends Sprite{
 	constructor(data){
 		super('imgs/player/sprite_1.png');
 		this.upd(data);
 	}
 	upd(d){
-		this.stats = d.stats;
-		this.w = d.hb.w;
-		this.h = d.hb.h;
-		this.direction = d.hb.dir;
-		this.position = tv(d.hb.pos);
-		this.setOffset = tv(d.hb.offset);
-		this.setScale = tv(d.hb.scale);
+		loadData(this,d);
 		this.v = d.v;
 		if(d.v){
 			this.visible = false;
@@ -170,20 +185,14 @@ class Plane extends Sprite{
 		this.upd(data);
 	}
 	upd(d){
-		this.stats = d.stats;
-		this.w = d.hb.w;
-		this.h = d.hb.h;
-		this.position = tv(d.hb.pos);
-		this.setOffset = tv(d.hb.offset);
-		this.setScale = tv(d.hb.scale);
-		this.direction = d.hb.dir;
-		this.flying = d.flying;
+		loadData(this,d);
+		this.on = d.on;
 		if(this.pid) {
 			this.player = drawObjs[d.pid];
 			this.player.vehicle = this;
 			this.player.position = tv(d.hb.pos);
 		}
-		if(this.flying){
+		if(this.on){
 			this.animation?.play('fly',true);
 		} else {
 			this.animation?.stop();
